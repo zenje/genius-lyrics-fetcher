@@ -7,7 +7,18 @@
     "test": "mocha"
   },
   "author": "zenje",
-  "license": "ISC",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zenje/genius-lyrics-fetcher"
+  },
+  "keywords": [
+    "genius",
+    "genius api",
+    "api client",
+    "song lyrics",
+    "lyrics"
+  ],
   "dependencies": {
     "axios": "^0.21.0",
     "cheerio": "^1.0.0-rc.3"
