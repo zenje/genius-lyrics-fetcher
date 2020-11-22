@@ -44,6 +44,7 @@ describe("GeniusFetcher", function () {
       const trackTitle = "San Francisco Street";
       const artistName = "Sun Rai";
       const result = await client.fetch("San Francisco Street", "Sun Rai");
+      expect(result).to.not.be.null;
       expect(result).to.have.all.keys(
         "songImg",
         "songImgSm",
@@ -101,6 +102,38 @@ describe("GeniusFetcher", function () {
     it("lyrics should not be returned", () => {
       return expect(
         client.fetch("random invalid song title", "random invalid artist name")
+      ).to.be.rejectedWith();
+    });
+  });
+
+  context("fetch artist", () => {
+    let client;
+    before(() => {
+      client = new GeniusFetcher.Client(TOKEN);
+    });
+
+    it("parameters must be present", () => {
+      try {
+        client.fetchArtist();
+        assert.fail("should not pass");
+      } catch (err) {
+        expect(err).to.be.an("Error");
+      }
+    });
+
+    it("artist info should be returned", async () => {
+      const artistName = "Tame Impala";
+      const result = await client.fetchArtist(artistName);
+      expect(result).to.not.be.null;
+      expect(result).to.have.all.keys("artistImg", "url", "artistName");
+      expect(result.artistName).to.equal(artistName);
+      expect(result.artistImg).to.not.be.null;
+      expect(result.url).to.equal("https://genius.com/artists/Tame-impala");
+    });
+
+    it("artist info should not be returned", () => {
+      return expect(
+        client.fetchArtist("random invalid artist!!")
       ).to.be.rejectedWith();
     });
   });

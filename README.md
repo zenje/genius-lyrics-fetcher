@@ -8,7 +8,7 @@ A simple node.js client that fetches song lyrics from the [**Genius API**](https
 npm install --save genius-lyrics-fetcher
 ```
 
-## Usage
+## Example usage
 
 Retrieve an access token from Genius: https://genius.com/developers
 
@@ -30,6 +30,12 @@ async function getLyrics() {
 }
 ```
 
+```
+async function getArtist() {
+  return await client.fetchArtist("Tame Impala");
+}
+```
+
 ### .then() usage
 
 ```
@@ -42,3 +48,7 @@ client.fetch("Nanã", "Polo & Pan")
 ### `fetch(trackTitle, artistName)`
 
 Returns a Promise resolving to an object `{ songImg, songImgSm, artistImg, url, artistName, trackTitle, lyrics }` for `trackTitle` by `artistName`. If the track is not found, an `Error` will be thrown.
+
+### `fetchArtist(artistName)`
+
+Returns a Promise resolving to an object `{ artistImg, url, artistName }` for `artistName`. If the artist is not found, an `Error` will be thrown.

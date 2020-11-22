@@ -1,6 +1,6 @@
 {
   "name": "genius-lyrics-fetcher",
-  "version": "2.0.1",
+  "version": "2.1.0",
   "description": "simple package that fetches song lyrics from the Genius API",
   "main": "index.js",
   "scripts": {

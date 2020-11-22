@@ -16,9 +16,10 @@ class Client {
     if (!trackTitle) throw new Error("trackTitle must be present");
     if (!artistName) throw new Error("artistName must be present");
 
+    const searchTerm = `${normalize(trackTitle)} ${normalize(artistName)}`;
     const findTrackInfo = getData(
       this.accessToken,
-      getSearchEndpoint(trackTitle, artistName)
+      getSearchEndpoint(searchTerm)
     )
       .then((response) => response.data)
       .then((data) => findTrackFromResults(data, trackTitle, artistName))
@@ -26,7 +27,7 @@ class Client {
         if (!track) throw new Error(`Track was not found from Genius API`);
         return track;
       })
-      .then(filterHit);
+      .then(filterForTrackInfo);
 
     const findLyrics = findTrackInfo
       .then((track) => track.url)
@@ -46,6 +47,27 @@ class Client {
         );
       });
   }
+
+  fetchArtist(artistName) {
+    if (!artistName) throw new Error("artistName must be present");
+
+    const searchTerm = `${normalize(artistName)}`;
+    return getData(this.accessToken, getSearchEndpoint(searchTerm))
+      .then((response) => response.data)
+      .then((data) => findArtistFromResults(data, artistName))
+      .then((artist) => {
+        if (!artist) throw new Error(`Artist was not found from Genius API`);
+        return artist;
+      })
+      .then(filterForArtistInfo)
+      .then((result) => ({
+        ...result,
+        artistName,
+      }))
+      .catch((err) => {
+        throw new Error(`Unable to find artist [${artistName}]`);
+      });
+  }
 }
 
 const getData = (accessToken, url) => {
@@ -56,11 +78,9 @@ const getData = (accessToken, url) => {
   });
 };
 
-const getSearchEndpoint = (trackTitle, artistName) => {
-  const searchTerm = `${normalize(trackTitle)} ${normalize(artistName)}`;
+const getSearchEndpoint = (searchTerm) =>
   // encode special characters, which need to be escaped
-  return encodeURI(`${SEARCH_ENDPOINT}${searchTerm}`);
-};
+  encodeURI(`${SEARCH_ENDPOINT}${searchTerm}`);
 
 const normalize = (text) => {
   return text
@@ -88,13 +108,34 @@ const findTrackFromResults = (results, track, artist) => {
   }
 };
 
-const filterHit = (hit) =>
+const findArtistFromResults = (results, artist) => {
+  if (
+    results &&
+    results.response &&
+    results.response.hits &&
+    results.response.hits.length
+  ) {
+    return results.response.hits.find(
+      (item, idx) =>
+        normalize(item.result.primary_artist.name) === normalize(artist)
+    );
+  }
+};
+
+const filterForTrackInfo = (hit) =>
   hit &&
   hit.result && {
     songImg: hit.result.song_art_image_url,
     songImgSm: hit.result.song_art_image_thumbnail_url,
     artistImg: hit.result.primary_artist.image_url,
     url: hit.result.url,
+  };
+
+const filterForArtistInfo = (hit) =>
+  hit &&
+  hit.result && {
+    artistImg: hit.result.primary_artist.image_url,
+    url: hit.result.primary_artist.url,
   };
 
 const getHtml = (url) => {
