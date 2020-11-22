@@ -40,9 +40,28 @@ describe("GeniusFetcher", function () {
       }
     });
 
-    it("song 1: lyrics should be returned", () => {
-      return expect(client.fetch("San Francisco Street", "Sun Rai")).to
-        .eventually.not.be.null;
+    it("song 1: lyrics and other info should be returned", async () => {
+      const trackTitle = "San Francisco Street";
+      const artistName = "Sun Rai";
+      const result = await client.fetch("San Francisco Street", "Sun Rai");
+      expect(result).to.have.all.keys(
+        "songImg",
+        "songImgSm",
+        "artistImg",
+        "url",
+        "artistName",
+        "trackTitle",
+        "lyrics"
+      );
+      expect(result.trackTitle).to.equal(trackTitle);
+      expect(result.artistName).to.equal(artistName);
+      expect(result.songImg).to.not.be.null;
+      expect(result.songImgSm).to.not.be.null;
+      expect(result.artistImg).to.not.be.null;
+      expect(result.url).to.equal(
+        "https://genius.com/Sun-rai-san-francisco-street-lyrics"
+      );
+      expect(result.lyrics).to.not.be.null;
     });
 
     it("song 2: lyrics should be returned (song with quotes)", () => {

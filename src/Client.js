@@ -16,11 +16,30 @@ class Client {
     if (!trackTitle) throw new Error("trackTitle must be present");
     if (!artistName) throw new Error("artistName must be present");
 
-    return getData(this.accessToken, getSearchEndpoint(trackTitle, artistName))
+    const findTrackInfo = getData(
+      this.accessToken,
+      getSearchEndpoint(trackTitle, artistName)
+    )
       .then((response) => response.data)
-      .then((data) => findTrackUrlFromResults(data, trackTitle, artistName))
+      .then((data) => findTrackFromResults(data, trackTitle, artistName))
+      .then((track) => {
+        if (!track) throw new Error(`Track was not found from Genius API`);
+        return track;
+      })
+      .then(filterHit);
+
+    const findLyrics = findTrackInfo
+      .then((track) => track.url)
       .then(getHtml)
-      .then(extractLyrics)
+      .then(extractLyrics);
+
+    return Promise.all([findTrackInfo, findLyrics])
+      .then((result) => ({
+        ...result[0],
+        trackTitle,
+        artistName,
+        lyrics: result[1],
+      }))
       .catch((err) => {
         throw new Error(
           `Unable to find track [${trackTitle}] for [${artistName}]`
@@ -54,24 +73,29 @@ const normalize = (text) => {
     : "";
 };
 
-const findTrackUrlFromResults = (results, track, artist) => {
+const findTrackFromResults = (results, track, artist) => {
   if (
     results &&
     results.response &&
     results.response.hits &&
     results.response.hits.length
   ) {
-    const hit = results.response.hits.find((item, idx) => {
-      return (
+    return results.response.hits.find(
+      (item, idx) =>
         normalize(item.result.title) === normalize(track) &&
         normalize(item.result.primary_artist.name) === normalize(artist)
-      );
-    });
-    if (hit) {
-      return hit.result.url;
-    }
+    );
   }
 };
+
+const filterHit = (hit) =>
+  hit &&
+  hit.result && {
+    songImg: hit.result.song_art_image_url,
+    songImgSm: hit.result.song_art_image_thumbnail_url,
+    artistImg: hit.result.primary_artist.image_url,
+    url: hit.result.url,
+  };
 
 const getHtml = (url) => {
   return axios.get(url).then((response) => {
