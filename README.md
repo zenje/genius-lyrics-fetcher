@@ -25,8 +25,8 @@ const client = new GeniusFetcher.Client(ACCESS_TOKEN);
 
 ```
 async function getLyrics() {
-  const lyrics = await client.fetch("San Francisco Street", "Sun Rai");
-  return lyrics;
+  const result = await client.fetch("San Francisco Street", "Sun Rai");
+  return result.lyrics;
 }
 ```
 
@@ -34,11 +34,11 @@ async function getLyrics() {
 
 ```
 client.fetch("Nanã", "Polo & Pan")
-  .then(lyrics => console.log(lyrics));
+  .then(result => console.log(result.lyrics));
 ```
 
 ## Methods
 
 ### `fetch(trackTitle, artistName)`
 
-Returns a promise resolving to a string containing lyrics for `trackTitle` by `artistName`. If no lyrics are found, an `Error` will be thrown.
+Returns a Promise resolving to an object `{ songImg, songImgSm, artistImg, url, artistName, trackTitle, lyrics }` for `trackTitle` by `artistName`. If the track is not found, an `Error` will be thrown.
